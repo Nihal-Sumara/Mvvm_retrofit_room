@@ -13,18 +13,17 @@ import com.example.practiceapp.model.DataClass
 import com.example.practiceapp.repository.DummyRepository
 import com.example.practiceapp.viewmodel.DummyVMFactory
 import com.example.practiceapp.viewmodel.DummyViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
     private lateinit var adapter: DummyAdapter
     private lateinit var binding: ActivityMainBinding
     private lateinit var dummyViewModel: DummyViewModel
     private var list = ArrayList<DataClass.Result>()
-    private lateinit var author: Author
+    private var authorList = ArrayList<Author>()
     private lateinit var database: AuthorDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,7 +44,6 @@ class MainActivity : AppCompatActivity() {
             if (!it.isNullOrEmpty()) {
                 list.clear()
                 list.addAll(it)
-                insertDataIntoDB(it)
                 adapter = DummyAdapter(it, object : DummyAdapter.ItemClick {
                     override fun clickItem(position: Int) {
                         Log.e("Position", list[position].author)
@@ -67,16 +65,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @DelicateCoroutinesApi
-    private fun insertDataIntoDB(data: ArrayList<DataClass.Result>) {
-        GlobalScope.launch {
-            withContext(Dispatchers.IO) {
-                author = Author(0, "nihal")
-                database.authorDao().insert(author)
-//                for (i in data) {
-//                    author = Author(0, "nihal")
-//                    database.authorDao().insert(author)
-                }
+    fun insertData(view: View) {
+        CoroutineScope(Dispatchers.IO).launch {
+            Log.e("Clicked", "insertData: Clicked")
+            for (data in list) {
+                authorList.add(Author(data.id, data.author))
             }
+            database.authorDao().insert(authorList)
         }
     }
+
+    fun showData(view: View) {
+        Log.e("Clicked", "showData: Clicked")
+        database.authorDao().select().observe(this@MainActivity) {
+            if (!it.isNullOrEmpty()) {
+                binding.tvData.text = it.toString()
+            } else Log.e("Data", "Data is empty")
+        }
+    }
+}

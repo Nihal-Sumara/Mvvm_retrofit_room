@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import kotlin.concurrent.Volatile
 
 /*mention all the table's you want to create in db here in array*/
-@Database(entities = [Author::class], version = 1)
+@Database(entities = [Author::class], version = 5)
 abstract class AuthorDatabase : RoomDatabase() {
     /*mention all fun for all the dao for different table you want to create*/
     abstract fun authorDao(): AuthorDao
